@@ -6,6 +6,9 @@ Running Locally
 
 Make sure you have Node.js installed.
 
+## Tip
+Use nodemon to have your server restart on file changes. Install nodemon using <code>npm install -g nodemon</code>. Then start your server with nodemon index.js.
+
     npm i
     npm start
 

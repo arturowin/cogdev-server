@@ -1,5 +1,7 @@
 const environment = module.exports = {
     AppName: 'coglite',
+    apiVersion: 'v1',
+    authPath: 'user/auth/',
     ApplicationSecret: 'UE9tCxtgBKXNSagEds9GcqGYaqv9DEsWXKvCtmvnFxdxPj1S3iQeDNKp99e5',
     PORT : process.env.COGLITE_PORT || 3500,
     DB : {

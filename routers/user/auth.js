@@ -9,7 +9,7 @@ auth.post('/', (req, res) => {
     new googleService(req.body.accessToken, req.body.refreshToken)
         .getGUser((err, gUser) => {
             if (err) {
-                res.json({success: false, msg: 'unable to auth user'});
+                res.json({success: false, msg: 'Authentication failed.  User not found.'});
             } else {
                 UserModel.createOrUpdateUser(req.body, (err, success) => {
                     if (err) {
@@ -20,7 +20,7 @@ auth.post('/', (req, res) => {
                                 environment.ApplicationSecret, {
                                 expiresIn: 604800 // 1 week
                             });
-                            res.json({success: true, token: 'JWT ' + token});
+                            res.json({success: true, token: token});
                         });
                     }
                 });
