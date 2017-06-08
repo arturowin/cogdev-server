@@ -1,121 +1,81 @@
-swagger: "2.0"
+---
+swagger: '2.0'
 info:
-  version: "0.0.1"
-  title: Coglite App
-# during dev, should point to your local machine
-host: localhost:3500
-# basePath prefixes all resource paths 
-basePath: /
-# 
-schemes:
-  # tip: remove http to make production-grade
-  - http
-  - https
-# format of bodies a client can send (Content-Type)
-consumes:
-  - application/json
-# format of the responses to the client (Accepts)
-produces:
-  - application/json
+  description: Coglite API Documentation
+  version: 1.0.0
+  title: Coglite API
+basePath: "/v1"
+tags:
+- name: User
+- name: Group
 paths:
-  /v1/user/auth/:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: Users
+  "/user/auth/":
     post:
-      description: User tokens for google api permissions
-      # used as the method name of the controller
-      operationId: token
+      tags:
+      - User
+      summary: Auth
+      description: ''
+      operationId: auth
+      consumes:
+      - application/json
+      produces:
+      - application/json
       parameters:
-        - name: uid
-          in: formData
-          description: The user firebase id
-          required: true
-          type: string
-        - name: displayName
-          in: formData
-          description: The user Name and Surname
-          required: true
-          type: string
-        - name: photoURL
-          in: formData
-          description: The user photo url
-          required: true
-          type: string
-        - name: email
-          in: formData
-          description: The user email address
-          required: true
-          type: string
-        - name: accessToken
-          in: formData
-          description: The user accessToken
-          required: true
-          type: string
-        - name: refreshToken
-          in: formData
-          description: The user refreshToken
-          required: true
-          type: string
+      - in: body
+        name: body
+        description: Auth Data
+        required: true
+        schema:
+          "$ref": "#/definitions/Auth"
       responses:
-        "200":
-          description: Success
+        '200':
+          description: successful operation
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/SuccessResponse"
-        # responses may fall through to errors
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /v1/user/group/create:
-    post:
-      description: User tokens for google api permissions
-      # used as the method name of the controller
-      parameters:
-        - name: ownerId
-          in: formData
-          description: group owner id
-          required: true
-          type: string
-        - name: name
-          in: formData
-          description: group name
-          required: true
-          type: string
-        - name: description
-          in: formData
-          description: group description
-          required: false
-          type: string
-        - name: members
-          in: formData
-          description: group participents
-          required: true
-          type: string
+            type: string
+        '404':
+          description: Resource ID not found
+        '500':
+          description: Handling error
+  "/user/profile/info":
+    get:
+      tags:
+      - User
+      security:
+      - Bearer: []
+      summary: Get user profile info
+      description: ''
+      operationId: info
+      consumes:
+      - application/json
       responses:
-        "200":
-          description: Success
+        '200':
+          description: successful operation
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/SuccessResponse"
-        # responses may fall through to errors
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"          
-  /swagger:
-    x-swagger-pipe: swagger_raw
-# complex objects have schema definitions
+            type: string
+        '404':
+          description: Resource ID not found
+        '500':
+          description: Handling error
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 definitions:
-  SuccessResponse:
-    required:
-      - message
+  Auth:
+    type: object
     properties:
-      message:
+      uid:
         type: string
-  ErrorResponse:
-    required:
-      - message
-    properties:
-      message:
+      accessToken:
         type: string
+      refreshToken:
+        type: string
+      displayName:
+        type: string
+      email:
+        type: string
+        format: double
+      photoURL:
+        type: string
+        format: double
