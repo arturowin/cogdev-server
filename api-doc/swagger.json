@@ -1,0 +1,128 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Coglite API Documentation",
+    "version": "1.0.0",
+    "title": "Coglite API"
+  },
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "User"
+    },
+    {
+      "name": "Group"
+    }
+  ],
+  "paths": {
+    "/user/auth/": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Auth",
+        "description": "",
+        "operationId": "auth",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Auth Data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Auth"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Resource ID not found"
+          },
+          "500": {
+            "description": "Handling error"
+          }
+        }
+      }
+    },
+    "/user/profile/info": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "Bearer": [
+
+            ]
+          }
+        ],
+        "summary": "Get user profile info",
+        "description": "",
+        "operationId": "info",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Resource ID not found"
+          },
+          "500": {
+            "description": "Handling error"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "Auth": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
+        },
+        "refreshToken": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "double"
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "double"
+        }
+      }
+    }
+  }
+}
