@@ -1,4 +1,15 @@
-import {Schema, model, Document} from 'mongoose';
+import {Schema, Model, Document, model} from 'mongoose';
+
+export interface IGroup extends Document {
+    ownerId: String;
+    name: String;
+    description?: String;
+    members: String;
+}
+
+export interface IGroupModel {
+
+}
 
 const groupSchema = new Schema({
     ownerId: {
@@ -18,8 +29,10 @@ const groupSchema = new Schema({
     },
     create_date: {
         type: Date,
+        "default": Date.now()
     }
 });
-const Group = model('Group', groupSchema);
 
-export default Group;
+export type GroupModel = Model<IGroup> & IGroupModel & IGroup;
+
+export const Group: GroupModel = <GroupModel>model<IGroup>("Group", groupSchema);

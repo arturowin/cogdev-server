@@ -2,31 +2,37 @@ import * as google from 'googleapis';
 import * as fs from 'fs';
 
 export class GoogleService {
-    auth: any;
+    oauth2Client: any;
+    scopes: Array<string> = [
+        'https://www.googleapis.com/auth/drive.metadata.readonly'
+    ];
 
-    constructor(accessToken: string, refreshToken: string) {
-        this.auth = this.authorize(accessToken, refreshToken);
+    constructor() {
+        const OAuth2 = google.auth.OAuth2;
+        this.oauth2Client = new OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            process.env.GOOGLE_AUTH_REDIRECT_URI
+        );
     }
 
     getGUser(callback: any) {
         const auth = google.oauth2('v2');
         auth.userinfo.get({
             userId: 'me',
-            auth: this.auth
+            auth: this.oauth2Client
         }, callback);
     }
 
-    authorize(accessToken: string, refreshToken: string) {
-        let OAuth2 = google.auth.OAuth2;
-        let oauth2Client = new OAuth2(
-            process.env.GOOGLE_CLIENT_SECRET,
-            process.env.GOOGLE_CLIENT_ID
-        );
-        oauth2Client.setCredentials({
+    getToken(code: string, callback: Function) {
+        this.oauth2Client.getToken(code, callback);
+    }
+
+    authorize(accessToken: string, refreshToken?: string) {
+        this.oauth2Client.setCredentials({
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken || null
         });
-        return oauth2Client;
     }
 
     listFiles(callback: any, pageSize: number, fields?: string) {
@@ -35,7 +41,7 @@ export class GoogleService {
         }
         let service = google.drive('v3');
         service.files.list({
-            auth: this.auth,
+            auth: this.oauth2Client,
             pageSize: pageSize,
             fields: fields
         }, callback);
@@ -44,7 +50,7 @@ export class GoogleService {
     filePermissions(fileId: string, userPermission: any, domainPermission: any, callback: any) {
         let service = google.drive('v3');
         service.permissions.create({
-                auth: this.auth,
+                auth: this.oauth2Client,
                 resource: userPermission,
                 fileId: fileId,
                 fields: 'id',
@@ -57,7 +63,7 @@ export class GoogleService {
 
         destination = fs.createWriteStream(destination);
         service.files.get({
-                auth: this.auth,
+                auth: this.oauth2Client,
                 fileId: fileId,
                 alt: alt,
                 mime_type: mime_type,
@@ -74,7 +80,7 @@ export class GoogleService {
     createFileFolder(fileMetadata: any, callback: any) {
         let service = google.drive('v3');
         service.files.create({
-            auth: this.auth,
+            auth: this.oauth2Client,
             resource: fileMetadata,
             fields: 'id'
         }, callback);
@@ -89,7 +95,7 @@ export class GoogleService {
 
         let service = google.drive('v3');
         service.files.create({
-            auth: this.auth,
+            auth: this.oauth2Client,
             resource: fileMetadata,
             media: media,
             fields: 'id'

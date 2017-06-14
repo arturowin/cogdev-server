@@ -1,7 +1,7 @@
-import {Schema, model, Document} from 'mongoose';
+import {Schema, Model, Document, model} from 'mongoose';
 
 
-interface IUser extends Document {
+export interface IUser extends Document {
     uid: String;
     displayName: String;
     photoURL: String;
@@ -11,7 +11,10 @@ interface IUser extends Document {
     groups: Array<String>;
     location: String;
     timezone: String;
-    createOrUpdate: (upsertData: any, callback: any) => void
+}
+
+export interface IUserModel {
+    createOrUpdate(upsertData: any, callback: any): void
 }
 
 const userSchema = new Schema({
@@ -49,22 +52,15 @@ const userSchema = new Schema({
         type: String,
     },
     create_date: {
-        type: Date
+        type: Date,
+        "default": Date.now()
     }
-}, {timestamps: true});
-
-userSchema.pre('save', (next) => {
-    if (!this.create_date) {
-        this.create_date = Date.now();
-    }
-    next();
 });
 
-userSchema.methods.createOrUpdate = (upsertData: any, callback: any) => {
+userSchema.static('createOrUpdate', (upsertData: any, callback: any) => {
     User.update({uid: upsertData.uid}, upsertData, {upsert: true}, callback);
-};
+});
 
-const User = model<IUser>('User', userSchema);
+export type UserModel = Model<IUser> & IUserModel & IUser;
 
-export default User;
-export const UserSchema = User.schema.methods;
+export const User: UserModel = <UserModel>model<IUser>("User", userSchema);
