@@ -2,7 +2,12 @@ import * as http from 'http';
 import * as debug from 'debug';
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: ".env" });
+
+if (process.env.NODE_ENV === 'test') {
+    dotenv.config({ path: ".env.test" });
+} else {
+    dotenv.config({ path: ".env" });
+}
 
 import App from './App';
 
@@ -15,6 +20,7 @@ const server = http.createServer(App);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
 
 function normalizePort(val: number|string): number|string|boolean {
     let port: number = (typeof val === 'string') ? parseInt(val, 10) : val;
@@ -34,3 +40,6 @@ function onListening(): void {
     let bind = (typeof address === 'string') ? `pipe ${address}` : `port ${address.port}`;
     debug(`Listening on ${bind}`);
 }
+
+
+export default server;

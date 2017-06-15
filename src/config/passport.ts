@@ -1,5 +1,5 @@
 import {Strategy, ExtractJwt} from 'passport-jwt';
-import {default as User} from '../models/user';
+import {User} from '../models/user';
 import {Passport} from "passport";
 
 export class PassportConfig {

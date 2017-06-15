@@ -1,6 +1,6 @@
 import {BaseRoute} from '../BaseRoute';
 import {Request, Response} from 'express';
-import {default as GroupModel} from '../../models/group';
+import {Group as GroupModel} from '../../models/group';
 
 export class Group extends BaseRoute {
 

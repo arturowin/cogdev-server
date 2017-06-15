@@ -5,7 +5,7 @@ export abstract class BaseRoute {
 
     router: Router;
 
-    constructor(){
+    constructor() {
         this.router = express.Router();
         this.initRoutes()
     }
