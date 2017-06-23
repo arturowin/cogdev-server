@@ -15,7 +15,7 @@ export const guard = (req: Request, res: Response, next: NextFunction) => {
                         message: 'Failed to authenticate token.'
                     });
                 } else {
-                    req.body.user = user;
+                    req.body.user = user._doc;
                     next();
                 }
             });

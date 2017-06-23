@@ -4,14 +4,9 @@ import { User } from "../../models/user";
 import {GoogleService} from '../../services/google.service';
 import {BaseRoute} from "../BaseRoute";
 
-export class Auth extends BaseRoute{
+export class Auth extends BaseRoute {
 
-
-    public initRoutes(): void {
-        this.authRoute();
-    }
-
-    public authRoute(): void {
+    public authAction(): void {
         this.router.post('/', (req: Request, res: Response) => {
             new GoogleService()
                 .getToken(req.body.auth_code, (err, tokens) => {

@@ -4,11 +4,7 @@ import {Group as GroupModel} from '../../models/group';
 
 export class Group extends BaseRoute {
 
-    public initRoutes(): void {
-        this.createRoute();
-    }
-
-    public createRoute(): void {
+    public createAction(): void {
         this.router.post('/create', (req: Request, res: Response) => {
             GroupModel.create(req.body, (err, group) => {
                 if (err) {

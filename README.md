@@ -34,8 +34,8 @@ using **.env.example** file.
 Run seeds and tests using
 <code>npm test</code> command.
 
-For tests used **.env.test** configuration file.
+ **.env.test** configuration file is used for tests.
 
-**Note**: During tests you must provide
-the auth code which is necessary for 
-Google Authentication.
+**Note**: During test running process you must provide
+
+the auth code which is necessary for Google Authentication.

@@ -6,7 +6,7 @@ const BUILD_DIRECTORY = 'dist';
 
 const tsProject = ts.createProject('tsconfig.json');
 
-gulp.task('watch', ['default'], () => {
+gulp.task('watch', ['scripts'], () => {
     gulp.watch('src/**/*.ts', ['scripts']);
     gulp.watch('api-doc/api/swagger/swagger.yaml', ['scripts']);
 });

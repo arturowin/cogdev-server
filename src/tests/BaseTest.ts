@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import * as chaiHttp from 'chai-http';
-import {default as server} from '../index'
+import {server} from '../index'
 import {User} from '../models/user';
 import * as jwt from 'jsonwebtoken';
 

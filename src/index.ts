@@ -1,45 +1,75 @@
 import * as http from 'http';
 import * as debug from 'debug';
-import * as dotenv from 'dotenv';
+import * as socketIo from 'socket.io';
+import App  from './App';
+import {socketGuard} from './middleware/socketGuard';
+import {EventRegister} from "./events/EventRegister";
+
+class Server {
+
+    private server: any;
+    private io: any;
+    private port: number;
+
+    public getServerInstance(): any {
+        return this.server;
+    }
 
 
-if (process.env.NODE_ENV === 'test') {
-    dotenv.config({ path: ".env.test" });
-} else {
-    dotenv.config({ path: ".env" });
+    public static bootstrap(): Server {
+        return new Server();
+    }
+
+
+    private debugMod(): void {
+        debug('ts-express:server');
+    }
+
+    constructor() {
+        this.debugMod();
+        this.runServer();
+    }
+
+    private runServer(): void {
+        this.port = this.normalizePort(process.env.PORT || 3500);
+        App.set('port', this.port);
+        this.createServer();
+        this.IoInit();
+    }
+
+    private IoInit(): void {
+        this.io = socketIo(this.server);
+        this.io.use(socketGuard);
+        this.io.on('connect', (socket: any) => {
+            console.log('Connected client on port');
+            EventRegister.bootstrapEventRegister(this.io, socket);
+            socket.on('disconnect', () => {
+                console.log('Client disconnected');
+            });
+        });
+
+    }
+
+    private createServer() {
+        this.server = http.createServer(App);
+        this.server.listen(this.port);
+        this.server.on('listening', () => {
+            let address = server.address();
+            let bind = (typeof address === 'string') ? `pipe ${address}` : `port ${address.port}`;
+            debug(`Listening on ${bind}`);
+        });
+        this.server.on('error', (error: NodeJS.ErrnoException) => {
+            if (error.syscall !== 'listen') throw error;
+            console.error(error);
+            process.exit(1);
+        });
+    }
+
+    private normalizePort(val: number|string): number {
+        let port: number = (typeof val === 'string') ? parseInt(val, 10) : val;
+        return port;
+    }
+
 }
 
-import App from './App';
-
-debug('ts-express:server');
-
-const port = normalizePort(process.env.PORT || 3500);
-App.set('port', port);
-
-const server = http.createServer(App);
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-
-
-function normalizePort(val: number|string): number|string|boolean {
-    let port: number = (typeof val === 'string') ? parseInt(val, 10) : val;
-    if (isNaN(port)) return val;
-    else if (port >= 0) return port;
-    else return false;
-}
-
-function onError(error: NodeJS.ErrnoException): void {
-    if (error.syscall !== 'listen') throw error;
-    console.error(error);
-    process.exit(1);
-}
-
-function onListening(): void {
-    let address = server.address();
-    let bind = (typeof address === 'string') ? `pipe ${address}` : `port ${address.port}`;
-    debug(`Listening on ${bind}`);
-}
-
-
-export default server;
+export const server = Server.bootstrap().getServerInstance();

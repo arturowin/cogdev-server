@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as logger from 'morgan';
 import * as bodyParser from 'body-parser';
@@ -14,6 +15,7 @@ class App {
     public express: express.Application;
 
     constructor() {
+        this.setEnvironment();
         this.express = express();
         this.swagger();
         this.database();
@@ -52,6 +54,14 @@ class App {
         this.express.use(passport.session());
         const pConfig = new PassportConfig(passport);
         pConfig.init();
+    }
+
+    private setEnvironment(): void {
+        if (process.env.NODE_ENV === 'test') {
+            dotenv.config({ path: ".env.test" });
+        } else {
+            dotenv.config({ path: ".env" });
+        }
     }
 
     /**
