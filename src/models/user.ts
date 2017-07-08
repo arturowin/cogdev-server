@@ -2,15 +2,17 @@ import {Schema, Model, Document, model} from 'mongoose';
 
 
 export interface IUser extends Document {
-    uid: String;
-    displayName: String;
-    photoURL: String;
-    email: String;
-    accessToken: String;
-    refreshToken: String;
-    groups: Array<String>;
-    location: String;
-    timezone: String;
+    uid: string;
+    displayName: string;
+    photoURL: string;
+    email: string;
+    activeDevices: number;
+    status: string;
+    accessToken: string;
+    refreshToken: string;
+    groups: Array<string>;
+    location: string;
+    timezone: string;
 }
 
 export interface IUserModel {
@@ -34,6 +36,15 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
+    status: {
+        type: String,
+        required: true
+    },
+    activeDevices: {
+      type: Number,
+      required: true,
+      "default": 0
+    },
     accessToken: {
         type: String,
         required: true
@@ -51,7 +62,11 @@ const userSchema = new Schema({
     timezone: {
         type: String,
     },
-    create_date: {
+    createAt: {
+        type: Date,
+        "default": Date.now()
+    },
+    updatedAt: {
         type: Date,
         "default": Date.now()
     }

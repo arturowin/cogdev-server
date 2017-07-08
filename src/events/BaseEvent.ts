@@ -3,8 +3,10 @@ export abstract class BaseEvent {
     private readonly _registeredMethodEnding = 'Event';
     protected io: any;
     protected socket: any;
+    protected redis: any;
 
-    constructor(io: any, socket: any) {
+    constructor(io: any, socket: any, redis: any) {
+        this.redis = redis;
         this.io = io;
         this.socket = socket;
         this.onInit();

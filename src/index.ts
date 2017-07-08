@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as debug from 'debug';
 import * as socketIo from 'socket.io';
+import * as redis from 'redis';
 import App  from './App';
 import {socketGuard} from './middleware/socketGuard';
 import {EventRegister} from "./events/EventRegister";
@@ -10,11 +11,15 @@ class Server {
     private server: any;
     private io: any;
     private port: number;
+    private redis: any;
 
     public getServerInstance(): any {
         return this.server;
     }
 
+    public createRedisInstance(): void {
+        this.redis = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+    }
 
     public static bootstrap(): Server {
         return new Server();
@@ -34,6 +39,7 @@ class Server {
         this.port = this.normalizePort(process.env.PORT || 3500);
         App.set('port', this.port);
         this.createServer();
+        this.createRedisInstance();
         this.IoInit();
     }
 
@@ -41,11 +47,7 @@ class Server {
         this.io = socketIo(this.server);
         this.io.use(socketGuard);
         this.io.on('connect', (socket: any) => {
-            console.log('Connected client on port');
-            EventRegister.bootstrapEventRegister(this.io, socket);
-            socket.on('disconnect', () => {
-                console.log('Client disconnected');
-            });
+            EventRegister.bootstrapEventRegister(this.io, socket, this.redis);
         });
 
     }

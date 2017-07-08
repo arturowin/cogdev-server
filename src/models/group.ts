@@ -14,7 +14,8 @@ export interface IGroupModel {
 const groupSchema = new Schema({
     ownerId: {
         type: String,
-        required: true
+        required: true,
+        ref: 'User',
     },
     name: {
         type: String,
@@ -27,7 +28,11 @@ const groupSchema = new Schema({
         type: Array,
         required: true
     },
-    create_date: {
+    createdAt: {
+        type: Date,
+        "default": Date.now()
+    },
+    updatedAt: {
         type: Date,
         "default": Date.now()
     }

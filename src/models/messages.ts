@@ -17,7 +17,8 @@ export interface IMessagesModel {
 const messagesSchema = new Schema({
     senderId: {
         type: String,
-        required: true
+        required: true,
+        ref: 'User'
     },
     conversationId: {
         type: String,

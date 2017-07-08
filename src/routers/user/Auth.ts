@@ -37,7 +37,8 @@ export class Auth extends BaseRoute {
                                         });
                                     res.json({
                                         success: true,
-                                        token: token
+                                        token: token,
+                                        _id: user._id.toString()
                                     });
                                 });
                             }

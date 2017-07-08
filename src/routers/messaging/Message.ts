@@ -1,8 +1,8 @@
 import {BaseRoute} from '../BaseRoute';
 import {Request, Response} from 'express';
 import {Conversation as ConversationModel} from '../../models/conversation';
-import {User as UserModel} from '../../models/user';
 import {Messages as MessagesModel} from '../../models/messages';
+import {Group as GroupModel} from '../../models/group';
 
 export class Message extends BaseRoute {
 
@@ -30,64 +30,89 @@ export class Message extends BaseRoute {
 
     public getRecentInterlocutorsAction(): void {
         this.router.get('/get-recent-interlocutors', (req: Request, res: Response) => {
-            ConversationModel.find({$or: [{recipient: req.body.user._id},{fromUserId: req.body.user._id}]},
-                'fromUserId recipient',
-                {sort: {updatedAt: -1}},
-                (err, conversations) => {
-                    if (err) {
+            ConversationModel.find({$and: [{type: 'direct'},{$or: [{recipient: req.body.user._id},
+                {fromUserId: req.body.user._id}]}]},
+                '_id fromUserId recipient',
+                {sort: {updatedAt: -1}})
+                .populate('recipient fromUserId', '_id photoURL displayName')
+                .exec((err: Error, conversations: any) => {
+                    if(err){
                         res.status(400);
-                        res.json({success: false, message: 'unable to get conversations'});
+                        res.json({success: false, message: 'something went wrong'});
                     } else {
-                        let interlocutors: Array<string> = [];
-                        conversations.map((user) => {
-
-                            const fromUserId = user.fromUserId.toString();
-                            const recipient = user.recipient.toString();
+                        let interlocutorUsers: Array<{userId: string, photoURL: string | null, displayName: string, conversationId: string}> = [];
+                        conversations.map((conversation) => {
+                            const conversationId = conversation._id.toString();
+                            const fromUserId = conversation.fromUserId._id.toString();
+                            const recipient = conversation.recipient._id.toString();
 
                             if (fromUserId !== req.body.user._id) {
-                                interlocutors.push(fromUserId)
+                                interlocutorUsers.push({
+                                    userId: fromUserId,
+                                    photoURL: conversation.fromUserId.photoURL.toString(),
+                                    displayName: conversation.fromUserId.displayName.toString(),
+                                    conversationId: conversationId
+                                });
                             } else {
-                                interlocutors.push(recipient)
+                                interlocutorUsers.push({
+                                    userId: recipient,
+                                    photoURL: conversation.recipient.photoURL.toString(),
+                                    displayName: conversation.recipient.displayName.toString(),
+                                    conversationId: conversationId
+                                });
                             }
                         });
-                        UserModel.find({ _id: { "$in" : interlocutors} },'_id uid photoURL displayName',(err, users) => {
-                            console.log(users);
-                            res.json({success: true, interlocutors: users });
-                        });
-
+                        res.json({success: true, interlocutors: interlocutorUsers });
                     }
                 });
         });
     }
 
-
-    public getConversationMessagesAction(): void {
-        this.router.get('/get-messages/:id',(req: Request, res: Response) => {
-            MessagesModel.find({conversationId: req.params.id},(err, messages) => {
+    public getGroupConversationsAction(): void {
+        this.router.get('/get-group-conversations', (req: Request, res: Response) => {
+            GroupModel.find({members: {$elemMatch: {$eq: req.body.user._id} } }, {sort: {name: 1}}, (err: Error, groups: any) => {
                 if (err) {
                     res.status(400);
                     res.json({success: false, message: 'something went wrong'});
                 } else {
-                    let senderIds: Array<string> = [];
-                    messages.map((message) => {
-                        const senderId: string = message.senderId.toString();
+                    res.json({success: true, groups: groups});
+                }
+            });
+        });
+    }
 
-                        if(senderId == req.body.user._id) {
-                            message.user = {
-                                _id: req.body.user._id,
-                                photoURL: req.body.user.photoURL,
-                                displayName: req.body.user.displayName,
-                            }
-                        } else {
-                            senderIds.push(senderId);
-                        }
-                    });
-                    console.log(messages);
-                    UserModel.find({ _id: { "$in" : senderIds} },'_id photoURL displayName',(err, users) => {
-                        console.log(users);
-                        res.json({success: true, interlocutors: users });
-                    });
 
+    public getConversationMessagesAction(): void {
+        this.router.get('/get-messages',(req: Request, res: Response) => {
+            const limit = 30;
+            console.log('skip',req.query.offset );
+            MessagesModel.find({conversationId: req.query.id},
+                '_id senderId conversationId messageBody updatedAt'
+            )
+            .sort({updatedAt: -1})
+            .skip(parseInt(req.query.offset))
+            .limit(limit)
+            .populate('senderId','_id photoURL displayName')
+            .exec((err: Error, messages: any) => {
+                if (err) {
+                    res.status(400);
+                    res.json({success: false, message: 'something went wrong'});
+                } else {
+                    let messagesResponse: Array<{_id: string; senderId: string; conversationId: string;
+                                                message: string;  updatedAt: Date; displayName: string,
+                                                photoURL: string}> = [];
+                    messages.map((message)=>{
+                        messagesResponse.push({
+                            _id: message._id.toString(),
+                            senderId: message.senderId._id.toString(),
+                            conversationId: message.conversationId.toString(),
+                            message: message.messageBody,
+                            updatedAt: message.updatedAt,
+                            displayName: message.senderId.displayName,
+                            photoURL: message.senderId.photoURL
+                        });
+                    });
+                    res.json({success: true, message: messagesResponse});
                 }
             });
         });
